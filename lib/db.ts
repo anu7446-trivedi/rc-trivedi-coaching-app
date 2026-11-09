@@ -149,15 +149,19 @@ export async function seedCourses() {
   const mk = async (category: Category, title: string, subtitle: string, price: number, mrp: number, order: number, extra: Partial<Course> = {}) => {
     ids[category] = await saveCourse({ ...base, category, title, subtitle, price, mrp, order, ...extra });
   };
-  await mk("maths", "Ganit (Maths) Course — Class 6 Entrance", "JNV / Sainik / Vidyagyan ke liye", 999, 1499, 2);
-  await mk("reasoning", "Reasoning (Mansik Yogyata) Course", "Mental Ability — chapterwise", 999, 1499, 3);
-  await mk("hindi", "Hindi (Bhasha) Course", "Gadyansh, vyakaran, shabd gyan", 699, 999, 4);
-  await mk("evs", "EVS / Paryavaran Adhyayan Course", "Vigyan + Samajik Adhyayan", 699, 999, 5);
-  await mk("tests", "Test Series — Sabhi Vishay", "Chapterwise + Full Mock Tests", 499, 799, 6);
-  await mk("free", "Free Mock Test & Notes", "Muft abhyas", 0, 0, 7, { published: true });
-  await mk("full", "Sampoorn Course — Class 6 Entrance (Sab Vishay)", "Maths + Reasoning + Hindi + EVS + Test Series", 2499, 4499, 1, {
-    includes: [ids.maths, ids.reasoning, ids.hindi, ids.evs, ids.tests], featured: true,
+  await mk("maths", "Ganit (Maths) Course — Class 6 Entrance", "JNV / Sainik / Vidyagyan ke liye", 599, 0, 2);
+  await mk("reasoning", "Reasoning (Mansik Yogyata) Course", "Mental Ability — chapterwise", 299, 0, 3);
+  await mk("hindi", "Hindi (Bhasha) Course", "Gadyansh, vyakaran, shabd gyan", 299, 0, 4);
+  await mk("evs", "EVS / Paryavaran Adhyayan Course", "Vigyan + Samajik Adhyayan", 299, 0, 5);
+  await mk("tests", "Topic-wise Test Series — Sabhi Vishay", "Har topic ke alag test", 399, 0, 6);
+  const topicTests = ids.tests;
+  await mk("tests", "50 Model Test Paper", "Poore pariksha pattern par 50 model paper", 499, 0, 7);
+  const modelPapers = ids.tests;
+  await mk("free", "Free Mock Test & Notes", "Muft abhyas", 0, 0, 8, { published: true });
+  await mk("full", "Sampoorn Course — Video Classes ke saath (Sab Vishay)", "Maths + Reasoning + Hindi + EVS", 2399, 0, 1, {
+    includes: [ids.maths, ids.reasoning, ids.hindi, ids.evs], featured: true,
   });
+  void topicTests; void modelPapers;
 }
 
 // ---------- Course items (video / pdf / test ...) ----------
