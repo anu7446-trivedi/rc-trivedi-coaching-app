@@ -4,7 +4,7 @@ rules_version = '2';
 //  RC Trivedi Coaching — Firestore Security Rules
 //  Firebase Console > Firestore Database > Rules me ye pura paste karke
 //  "Publish" dabayein.
-//  ⚠️ Neeche YOUR_ADMIN_EMAIL@gmail.com ki jagah apna admin email likhein
+//  ⚠️ Neeche rct.anurag.2015@gmail.com ki jagah apna admin email likhein
 //     (wahi jo firebaseConfig.ts me likha hai).
 // =====================================================================
 service cloud.firestore {
@@ -12,7 +12,7 @@ service cloud.firestore {
 
     function signedIn() { return request.auth != null; }
     function isAdmin() {
-      return signedIn() && request.auth.token.email in ['YOUR_ADMIN_EMAIL@gmail.com'];
+      return signedIn() && request.auth.token.email in ['rct.anurag.2015@gmail.com'];
     }
     function studentDoc() {
       return /databases/$(database)/documents/students/$(request.auth.uid);

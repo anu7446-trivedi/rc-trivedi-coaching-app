@@ -16,7 +16,7 @@ export const firebaseConfig = {
 //  STEP 2: Admin (aapka) email. Isi email se login karne par Admin Panel
 //  khulega. Yahi email firestore.rules me bhi daalna hai.
 // =====================================================================
-export const ADMIN_EMAILS = ["YOUR_ADMIN_EMAIL@gmail.com"];
+export const ADMIN_EMAILS = ["rct.anurag.2015@gmail.com"];
 
 // Students mobile number se login karte hain. Andar hi andar mobile number
 // ko is domain wale email me badla jata hai (jaise 9876543210@rctrivedi.app).
