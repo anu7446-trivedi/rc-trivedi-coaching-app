@@ -14,7 +14,6 @@
     },
     "android": {
       "package": "com.rctrivedi.coaching",
-      "versionCode": 4,
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#071B3A"
@@ -28,6 +27,13 @@
     "plugins": [
       "expo-router",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b2a9aa60-7a73-4f91-875d-5390a89967d0"
+      }
+    },
+    "owner": "anudiv7446s-team"
   }
 }
