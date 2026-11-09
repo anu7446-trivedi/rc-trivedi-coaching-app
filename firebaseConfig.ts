@@ -4,12 +4,12 @@
 //  (Ye keys secret nahi hoti — app me rakhna safe hai.)
 // =====================================================================
 export const firebaseConfig = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
-  projectId: "PASTE_PROJECT_ID",
-  storageBucket: "PASTE_PROJECT_ID.firebasestorage.app",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID",
+  apiKey: "AIzaSyDzwO0iRAMK9BDeCVVgTHfVzouX0kuyznQ",
+  authDomain: "rc-trivedi-coaching.firebaseapp.com",
+  projectId: "rc-trivedi-coaching",
+  storageBucket: "rc-trivedi-coaching.firebasestorage.app",
+  messagingSenderId: "2257172402",
+  appId: "1:2257172402:web:7fdf806014477a5676d6ab",
 };
 
 // =====================================================================
