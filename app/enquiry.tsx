@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { router } from "expo-router";
 import { addEnquiry } from "../lib/db";
-import { isConfigured } from "../lib/firebase";
 import { Btn, Card, H, Input, Screen, Sub, notify } from "../components/ui";
 
 export default function Enquiry() {
@@ -12,7 +11,6 @@ export default function Enquiry() {
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
-    if (!isConfigured) return notify("Firebase setup baaki hai");
     if (!name.trim() || mobile.replace(/\D/g, "").length < 10) return notify("Naam aur sahi mobile number bharein");
     setBusy(true);
     try {

@@ -1,50 +1,37 @@
 import React, { useState } from "react";
-import { Text, View } from "react-native";
-import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "firebase/auth";
-import { authErrorHi, useAuth } from "../../lib/auth";
-import { Btn, Card, Input, Label, Screen, notify } from "../../components/ui";
-import { C } from "../../lib/theme";
+import { router } from "expo-router";
+import { updateMyProfile } from "../../lib/db";
+import { useAuth } from "../../lib/auth";
+import { Btn, Card, Input, Screen, Sub, notify } from "../../components/ui";
 
 export default function Profile() {
-  const { student, user, logout } = useAuth();
-  const [oldPw, setOldPw] = useState("");
-  const [newPw, setNewPw] = useState("");
+  const { student, refreshStudent } = useAuth();
+  const [name, setName] = useState(student!.name);
+  const [fatherName, setFatherName] = useState(student!.fatherName ?? "");
+  const [className, setClassName] = useState(student!.className ?? "");
+  const [address, setAddress] = useState(student!.address ?? "");
   const [busy, setBusy] = useState(false);
-
-  const change = async () => {
-    if (newPw.length < 6) return notify("Naya password kam se kam 6 akshar ka ho");
+  const save = async () => {
+    if (name.trim().length < 2) return notify("Naam likhein");
     setBusy(true);
     try {
-      await reauthenticateWithCredential(user!, EmailAuthProvider.credential(user!.email!, oldPw));
-      await updatePassword(user!, newPw);
-      setOldPw(""); setNewPw("");
-      notify("Password badal gaya ✓");
-    } catch (e) { notify("Error", authErrorHi(e)); }
+      await updateMyProfile(student!.id, { name: name.trim(), fatherName: fatherName.trim(), className: className.trim(), address: address.trim() });
+      await refreshStudent();
+      notify("Save ho gaya ✓");
+      router.back();
+    } catch (e: any) { notify("Error", e?.message); }
     finally { setBusy(false); }
   };
-
-  const rows: [string, string | undefined][] = [
-    ["Naam", student!.name], ["Mobile", student!.mobile], ["Pita ka naam", student!.fatherName],
-    ["Class / Course", student!.className], ["Pata", student!.address], ["Joining", student!.joinDate],
-    ["Mahine ki fees", `₹${student!.monthlyFee || 0}`],
-  ];
   return (
     <Screen>
+      <Sub>Mobile: {student!.phone} (badla nahi ja sakta)</Sub>
       <Card>
-        {rows.map(([k, v]) => (
-          <View key={k} style={{ flexDirection: "row", paddingVertical: 8, borderBottomWidth: 1, borderColor: C.border }}>
-            <Text style={{ width: 120, color: C.sub }}>{k}</Text>
-            <Text style={{ flex: 1, fontWeight: "700", color: C.text }}>{v || "—"}</Text>
-          </View>
-        ))}
+        <Input label="Naam" value={name} onChangeText={setName} />
+        <Input label="Pita ka Naam" value={fatherName} onChangeText={setFatherName} />
+        <Input label="Class" value={className} onChangeText={setClassName} />
+        <Input label="Pata" value={address} onChangeText={setAddress} />
+        <Btn title="Save Karein" icon="save-outline" onPress={save} loading={busy} />
       </Card>
-      <Card>
-        <Label>🔑 Password Badlein</Label>
-        <Input placeholder="Purana password" secureTextEntry value={oldPw} onChangeText={setOldPw} />
-        <Input placeholder="Naya password" secureTextEntry value={newPw} onChangeText={setNewPw} />
-        <Btn title="Password Badlein" onPress={change} loading={busy} />
-      </Card>
-      <Btn title="Logout" icon="log-out-outline" outline color={C.red} onPress={logout} />
     </Screen>
   );
 }

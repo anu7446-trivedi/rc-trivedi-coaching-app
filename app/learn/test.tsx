@@ -1,15 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useAuth } from "../../../lib/auth";
-import { getMyResult, getTest, getTestKey, Result, score, submitResult, Test } from "../../../lib/db";
-import { Btn, Card, Loading, Screen, confirm, notify } from "../../../components/ui";
-import { C } from "../../../lib/theme";
+import { useAuth } from "../../lib/auth";
+import { getItem, getMyResult, getTestKey, Item, Result, score, submitResult } from "../../lib/db";
+import { Btn, Card, Loading, Screen, confirm, notify } from "../../components/ui";
+import { C } from "../../lib/theme";
 
 export default function TakeTest() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { cid, iid } = useLocalSearchParams<{ cid: string; iid: string }>();
   const { student } = useAuth();
-  const [test, setTest] = useState<Test | null>(null);
+  const [test, setTest] = useState<Item | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [key, setKey] = useState<number[] | null>(null);
   const [started, setStarted] = useState(false);
@@ -20,21 +20,22 @@ export default function TakeTest() {
   const submitted = useRef(false);
 
   const loadResult = async () => {
-    const r = await getMyResult(id, student!.id);
+    if (!student) return;
+    const r = await getMyResult(iid, student.id);
     setResult(r);
-    if (r) setKey(await getTestKey(id));
+    if (r) setKey(await getTestKey(cid, iid));
   };
 
   useEffect(() => {
     (async () => {
-      const t = await getTest(id);
+      const t = await getItem(cid, iid).catch(() => null);
       setTest(t);
-      if (t) setAnswers(t.questions.map(() => null));
+      if (t) setAnswers((t.questions ?? []).map(() => null));
       await loadResult();
       setReady(true);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [cid, iid]);
 
   useEffect(() => {
     if (!started) return;
@@ -52,7 +53,7 @@ export default function TakeTest() {
     submitted.current = true;
     setBusy(true);
     try {
-      await submitResult({ testId: test.id, testTitle: test.title, studentId: student!.id, studentName: student!.name, answers });
+      await submitResult({ courseId: cid, itemId: iid, testTitle: test.title, studentId: student!.id, studentName: student!.name, answers });
       setStarted(false);
       await loadResult();
     } catch (e: any) {
@@ -64,7 +65,9 @@ export default function TakeTest() {
   };
 
   if (!ready) return <Loading />;
-  if (!test) return <Screen><Text>Test nahi mila.</Text></Screen>;
+  if (!test || !test.questions) return <Screen><Text>🔒 Test nahi mila (course khareedein).</Text></Screen>;
+  if (!student) return <Screen><Text>Test dene ke liye login karein.</Text></Screen>;
+  const questions = test.questions;
 
   // ---- Result view ----
   if (result) {
@@ -77,7 +80,7 @@ export default function TakeTest() {
           <Text style={{ color: C.gold, fontSize: 44, fontWeight: "900" }}>{sc ? `${sc.right}/${sc.total}` : "—"}</Text>
           {sc ? <Text style={{ color: "#fff" }}>✅ Sahi {sc.right}   ❌ Galat {sc.wrong}   ⏭ Chhoda {sc.skipped}</Text> : null}
         </Card>
-        {test.questions.map((q, i) => {
+        {questions.map((q, i) => {
           const mine = result.answers[i];
           const right = key?.[i];
           return (
@@ -105,12 +108,12 @@ export default function TakeTest() {
         <Stack.Screen options={{ title: test.title }} />
         <Card>
           <Text style={s.title}>{test.title}</Text>
-          <Text style={s.info}>📝 Kul prashn: {test.questions.length}</Text>
-          <Text style={s.info}>⏱ Samay: {test.durationMin} minute</Text>
+          <Text style={s.info}>📝 Kul prashn: {questions.length}</Text>
+          <Text style={s.info}>⏱ Samay: {test.durationMin || 30} minute</Text>
           <Text style={s.info}>⚠️ Test sirf ek baar diya ja sakta hai.</Text>
           <Text style={s.info}>⚠️ Time khatam hone par apne aap submit hoga.</Text>
         </Card>
-        <Btn title="Test Shuru Karein" icon="play" onPress={() => { setLeft(test.durationMin * 60); setStarted(true); }} />
+        <Btn title="Test Shuru Karein" icon="play" onPress={() => { setLeft((test.durationMin || 30) * 60); setStarted(true); }} />
       </Screen>
     );
   }
@@ -123,11 +126,11 @@ export default function TakeTest() {
     <View style={{ flex: 1 }}>
       <Stack.Screen options={{ title: `⏱ ${mm}:${ss}`, headerBackVisible: false, gestureEnabled: false }} />
       <View style={s.bar}>
-        <Text style={s.barT}>Attempted: {attempted}/{test.questions.length}</Text>
+        <Text style={s.barT}>Attempted: {attempted}/{questions.length}</Text>
         <Text style={[s.barT, left < 60 && { color: "#ffb4b4" }]}>⏱ {mm}:{ss}</Text>
       </View>
       <Screen>
-        {test.questions.map((q, i) => (
+        {questions.map((q, i) => (
           <Card key={i}>
             <Text style={s.q}>Q{i + 1}. {q.q}</Text>
             {q.options.map((o, j) => (
@@ -146,7 +149,7 @@ export default function TakeTest() {
           icon="checkmark-done"
           color={C.green}
           loading={busy}
-          onPress={() => confirm("Submit karein?", `${attempted}/${test.questions.length} prashn attempt kiye hain.`, doSubmit)}
+          onPress={() => confirm("Submit karein?", `${attempted}/${questions.length} prashn attempt kiye hain.`, doSubmit)}
         />
       </Screen>
     </View>

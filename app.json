@@ -2,7 +2,7 @@
   "expo": {
     "name": "RC Trivedi Coaching",
     "slug": "rc-trivedi-coaching",
-    "version": "4.0.0",
+    "version": "5.0.0",
     "scheme": "rctrivedi",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
@@ -18,15 +18,28 @@
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#071B3A"
       },
-      "permissions": []
-    },
-    "web": {
-      "bundler": "metro",
-      "favicon": "./assets/logo.png"
+      "permissions": [],
+      "googleServicesFile": "./google-services.json"
     },
     "plugins": [
       "expo-router",
-      "expo-web-browser"
+      "expo-web-browser",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Banner aur course ki photo chunne ke liye."
+        }
+      ]
     ],
     "extra": {
       "router": {},

@@ -1,20 +1,20 @@
 import React from "react";
 import { Text, View } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { deleteResult, fmtDate, getResultsForTest, getTest, getTestKey, score } from "../../lib/db";
+import { deleteResult, fmtDate, getItem, getResultsForTest, getTestKey, score } from "../../lib/db";
 import { useLoad } from "../../lib/useLoad";
 import { Btn, Card, Empty, Loading, Screen, Sub, confirm } from "../../components/ui";
 import { C } from "../../lib/theme";
 
 export default function TestResults() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { cid, iid } = useLocalSearchParams<{ cid: string; iid: string }>();
   const { data, loading, reload } = useLoad(async () => {
-    const [test, key, results] = await Promise.all([getTest(id), getTestKey(id), getResultsForTest(id)]);
+    const [test, key, results] = await Promise.all([getItem(cid, iid), getTestKey(cid, iid), getResultsForTest(iid)]);
     const rows = results
       .map((r) => ({ ...r, sc: score(r.answers, key ?? []) }))
       .sort((a, b) => b.sc.right - a.sc.right);
     return { test, rows };
-  }, [id]);
+  }, [cid, iid]);
   if (!data) return <Loading />;
   const avg = data.rows.length ? (data.rows.reduce((t, r) => t + r.sc.right, 0) / data.rows.length).toFixed(1) : "–";
   return (
@@ -22,7 +22,7 @@ export default function TestResults() {
       <Stack.Screen options={{ title: data.test?.title ?? "Results" }} />
       <Card style={{ backgroundColor: C.navy }}>
         <Text style={{ color: "#c8d4e6" }}>{data.rows.length} students ne test diya</Text>
-        <Text style={{ color: C.gold, fontSize: 24, fontWeight: "900" }}>Average: {avg} / {data.test?.questions.length ?? 0}</Text>
+        <Text style={{ color: C.gold, fontSize: 24, fontWeight: "900" }}>Average: {avg} / {data.test?.questions?.length ?? 0}</Text>
       </Card>
       <Sub>Merit list (sabse zyada number upar). "Dobara" dabane se student fir se test de payega.</Sub>
       {data.rows.length === 0 ? <Empty text="Abhi kisi ne test nahi diya." /> : null}

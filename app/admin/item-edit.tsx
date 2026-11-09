@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { Batch, getBatches, getTest, getTestKey, Question, saveTest } from "../../lib/db";
-import BatchPicker from "../../components/BatchPicker";
+import { getItem, getItems, getTestKey, ItemType, Question, saveItem } from "../../lib/db";
 import { Btn, Card, Chip, Input, Label, Loading, Screen, Sub, confirm, notify } from "../../components/ui";
 import { C } from "../../lib/theme";
 
 const blank = (): Question => ({ q: "", options: ["", "", "", ""], answer: 0 });
+const TYPES: { k: ItemType; l: string }[] = [
+  { k: "video", l: "🎬 Video" }, { k: "live", l: "🔴 Live" }, { k: "pdf", l: "📄 PDF" }, { k: "test", l: "📝 Test" }, { k: "link", l: "🔗 Link" },
+];
+const HELP: Record<ItemType, string> = {
+  video: "YouTube par video 'Unlisted' upload karein → Share → link copy karke yahan daalein. Video app ke andar chalega.",
+  live: "YouTube par Live shuru karein (Unlisted) → uska link yahan daalein. Class ke samay students yahin se dekhenge.",
+  pdf: "PDF ko Google Drive par upload karein → Share → 'Anyone with the link' → link copy karke yahan daalein.",
+  link: "Koi bhi website / Google Form ka link.",
+  test: "",
+};
 
 // Bulk paste format:
 // Q. Prashn
@@ -29,45 +38,59 @@ function parseBulk(text: string): Question[] {
   return out.filter((q) => q.q && q.options.filter(Boolean).length >= 2);
 }
 
-export default function TestEdit() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
+export default function ItemEdit() {
+  const p = useLocalSearchParams<{ cid: string; id?: string; type?: ItemType }>();
+  const { cid, id } = p;
   const [ready, setReady] = useState(!id);
-  const [batches, setBatches] = useState<Batch[]>([]);
+  const [type, setType] = useState<ItemType>(p.type ?? "video");
+  const [prevType, setPrevType] = useState<ItemType | undefined>();
   const [title, setTitle] = useState("");
+  const [section, setSection] = useState("");
+  const [sections, setSections] = useState<string[]>([]);
+  const [url, setUrl] = useState("");
+  const [order, setOrder] = useState("10");
   const [duration, setDuration] = useState("30");
-  const [batchId, setBatchId] = useState("all");
-  const [published, setPublished] = useState(false);
   const [qs, setQs] = useState<Question[]>([blank()]);
   const [bulk, setBulk] = useState("");
   const [showBulk, setShowBulk] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    getBatches().then(setBatches);
+    getItems(cid).then((its) => setSections([...new Set(its.map((i) => i.section).filter(Boolean) as string[])]));
     if (!id) return;
     (async () => {
-      const [t, key] = await Promise.all([getTest(id), getTestKey(id)]);
-      if (t) {
-        setTitle(t.title); setDuration(String(t.durationMin)); setBatchId(t.batchId); setPublished(t.published);
-        setQs(t.questions.map((q, i) => ({ ...q, answer: key?.[i] ?? 0 })));
+      const it = await getItem(cid, id);
+      if (it) {
+        setType(it.type); setPrevType(it.type); setTitle(it.title); setSection(it.section ?? ""); setUrl(it.url ?? "");
+        setOrder(String(it.order ?? 10)); setDuration(String(it.durationMin ?? 30));
+        if (it.type === "test") {
+          const key = await getTestKey(cid, id);
+          setQs((it.questions ?? []).map((q, i) => ({ ...q, answer: key?.[i] ?? 0 })));
+        }
       }
       setReady(true);
     })();
-  }, [id]);
-
+  }, [cid, id]);
   if (!ready) return <Loading />;
 
   const upd = (i: number, f: (q: Question) => Question) => setQs((all) => all.map((q, k) => (k === i ? f(q) : q)));
 
   const save = async () => {
-    const clean = qs.filter((q) => q.q.trim());
-    if (!title.trim() || clean.length === 0) return notify("Title aur kam se kam 1 prashn zaroori hai");
-    const bad = clean.findIndex((q) => q.options.filter((o) => o.trim()).length < 2 || !q.options[q.answer ?? 0]?.trim());
-    if (bad >= 0) return notify(`Prashn ${bad + 1} check karein`, "Kam se kam 2 option aur sahi uttar wala option bhara hona chahiye.");
+    if (!title.trim()) return notify("Title likhein");
+    let questions: Question[] | undefined;
+    if (type === "test") {
+      questions = qs.filter((q) => q.q.trim());
+      if (!questions.length) return notify("Kam se kam 1 prashn daalein");
+      const bad = questions.findIndex((q) => q.options.filter((o) => o.trim()).length < 2 || !q.options[q.answer ?? 0]?.trim());
+      if (bad >= 0) return notify(`Prashn ${bad + 1} check karein`, "Kam se kam 2 option aur sahi uttar wala option bhara ho.");
+    } else if (!/^https?:\/\//.test(url.trim())) return notify("Sahi link daalein (https://…)");
     setBusy(true);
     try {
-      await saveTest({ title: title.trim(), durationMin: Number(duration) || 30, batchId, published, questions: clean }, id);
-      notify("Test save ho gaya ✓", published ? "Students ko dikh raha hai." : "Draft hai — 'Live karein' dabane par students ko dikhega.");
+      await saveItem(cid, {
+        title: title.trim(), type, section: section.trim() || "Anya", order: Number(order) || 10,
+        ...(type === "test" ? { questions, durationMin: Number(duration) || 30 } : { url: url.trim() }),
+      }, id, prevType);
+      notify("Save ho gaya ✓");
       router.back();
     } catch (e: any) { notify("Error", e?.message); }
     finally { setBusy(false); }
@@ -75,17 +98,31 @@ export default function TestEdit() {
 
   return (
     <Screen>
-      <Stack.Screen options={{ title: id ? "Test Edit" : "Naya Test" }} />
+      <Stack.Screen options={{ title: id ? "Content Edit" : "Content Jodein" }} />
       <Card>
-        <Input label="Test ka naam" value={title} onChangeText={setTitle} placeholder="jaise: JNV Mock Test 1" />
-        <Input label="Samay (minute)" keyboardType="numeric" value={duration} onChangeText={setDuration} />
-        <BatchPicker batches={batches} value={batchId} onChange={setBatchId} label="Kis batch ke liye" />
-        <View style={{ flexDirection: "row" }}>
-          <Chip label="📝 Draft" active={!published} onPress={() => setPublished(false)} />
-          <Chip label="🟢 Live (students ko dikhe)" active={published} onPress={() => setPublished(true)} />
+        <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+          {TYPES.map((t) => <Chip key={t.k} label={t.l} active={type === t.k} onPress={() => setType(t.k)} />)}
         </View>
+        <Input label="Title *" value={title} onChangeText={setTitle} placeholder={type === "test" ? "jaise: Ganit Test 1 — Bhinn" : "jaise: Bhinn — Class 1"} />
+        <Input label="Chapter / Section" value={section} onChangeText={setSection} placeholder="jaise: Bhinn (Fractions)" />
+        {sections.length ? (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: -6 }}>
+            {sections.map((sct) => <Chip key={sct} label={sct} active={section === sct} onPress={() => setSection(sct)} />)}
+          </View>
+        ) : null}
+        {type !== "test" ? (
+          <>
+            <Sub>{HELP[type]}</Sub>
+            <Input label="Link *" autoCapitalize="none" keyboardType="url" value={url} onChangeText={setUrl} placeholder="https://…" />
+          </>
+        ) : (
+          <Input label="Samay (minute)" keyboardType="numeric" value={duration} onChangeText={setDuration} />
+        )}
+        <Input label="Kram (chhota number pehle)" keyboardType="numeric" value={order} onChangeText={setOrder} />
       </Card>
 
+      {type === "test" ? (
+        <>
       <Btn title={showBulk ? "Bulk paste band karein" : "📋 Ek saath kai prashn paste karein"} outline onPress={() => setShowBulk(!showBulk)} />
       {showBulk ? (
         <Card>
@@ -125,7 +162,9 @@ export default function TestEdit() {
         </Card>
       ))}
       <Btn title="+ Ek aur Prashn" outline onPress={() => setQs((a) => [...a, blank()])} />
-      <Btn title={`Test Save Karein (${qs.filter((q) => q.q.trim()).length} prashn)`} icon="save-outline" color={C.green} onPress={save} loading={busy} />
+        </>
+      ) : null}
+      <Btn title="Save Karein" icon="save-outline" color={C.green} onPress={save} loading={busy} />
     </Screen>
   );
 }

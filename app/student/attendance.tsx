@@ -9,6 +9,7 @@ import { C } from "../../lib/theme";
 export default function AttendanceScreen() {
   const { student } = useAuth();
   const { data, loading, reload } = useLoad(async () => {
+    if (!student!.batchId) return [];
     const all = await getAttendanceForBatch(student!.batchId);
     return all
       .filter((a) => a.present.includes(student!.id) || a.absent.includes(student!.id))

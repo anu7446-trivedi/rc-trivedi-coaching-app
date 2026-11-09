@@ -2,8 +2,6 @@ rules_version = '2';
 
 // =====================================================================
 //  RC Trivedi Coaching — Firestore Security Rules
-//  Firebase Console > Firestore Database > Rules me ye pura paste karke
-//  "Publish" dabayein.
 //  Admin email: rct.anurag.2015@gmail.com (firebaseConfig.ts me bhi yahi hai).
 // =====================================================================
 service cloud.firestore {
@@ -13,23 +11,84 @@ service cloud.firestore {
     function isAdmin() {
       return signedIn() && request.auth.token.email in ['rct.anurag.2015@gmail.com'];
     }
-    function studentDoc() {
-      return /databases/$(database)/documents/students/$(request.auth.uid);
-    }
-    function isStudent() {
-      return signedIn() && exists(studentDoc()) && get(studentDoc()).data.active == true;
-    }
+    function me() { return /databases/$(database)/documents/students/$(request.auth.uid); }
+    function isStudent() { return signedIn() && exists(me()) && get(me()).data.active == true; }
     function member() { return isAdmin() || isStudent(); }
+    function enrolled(cid) {
+      let e = /databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + cid);
+      return exists(e) && get(e).data.expiresAt > request.time;
+    }
+    function courseFree(cid) {
+      return get(/databases/$(database)/documents/courses/$(cid)).data.price <= 0;
+    }
+    function canLearn(cid) { return isAdmin() || (isStudent() && (courseFree(cid) || enrolled(cid))); }
 
-    // App ki settings (naam, phone, UPI) — sab padh sakte hain, sirf admin badle
     match /settings/{id} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
+    // Student apni profile khud banata hai (OTP login ke baad)
     match /students/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create: if isAdmin() || (
+        signedIn() && request.auth.uid == uid
+        && request.resource.data.active == true
+        && request.resource.data.phone == request.auth.token.phone_number
+        && request.resource.data.name is string && request.resource.data.name.size() < 80
+        && request.resource.data.keys().hasOnly(['name', 'phone', 'fatherName', 'className', 'address', 'active', 'createdAt'])
+      );
+      allow update: if isAdmin() || (
+        signedIn() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'fatherName', 'className', 'address'])
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Courses: Live course sab dekh sakte hain (bina login bhi)
+    match /courses/{cid} {
+      allow read: if resource.data.published == true || isAdmin();
       allow write: if isAdmin();
+
+      // Video/PDF/Test: sirf khareedne wale (ya free course)
+      match /items/{iid} {
+        allow read: if canLearn(cid);
+        allow write: if isAdmin();
+      }
+      // Test ke sahi uttar: test dene ke BAAD hi
+      match /keys/{iid} {
+        allow read: if isAdmin() || (isStudent() &&
+          exists(/databases/$(database)/documents/results/$(iid + '_' + request.auth.uid)));
+        allow write: if isAdmin();
+      }
+    }
+
+    // Kharide hue course — sirf server (payment) ya admin likh sakta hai
+    match /enrollments/{id} {
+      allow get: if isAdmin() || (signedIn() && id.matches(request.auth.uid + '_.*'));
+      allow list: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow write: if isAdmin();
+    }
+
+    // Razorpay orders — sirf server likhta hai
+    match /orders/{id} {
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow write: if false;
+    }
+
+    // Test result: ek test ek hi baar
+    match /results/{id} {
+      allow get: if isAdmin() || (signedIn() && id.matches('.*_' + request.auth.uid + '$'));
+      allow list: if isAdmin() || (signedIn() && resource.data.studentId == request.auth.uid);
+      allow create: if isAdmin() || (
+        isStudent()
+        && request.resource.data.studentId == request.auth.uid
+        && id == request.resource.data.itemId + '_' + request.auth.uid
+        && canLearn(request.resource.data.courseId)
+        && exists(/databases/$(database)/documents/courses/$(request.resource.data.courseId)/items/$(request.resource.data.itemId))
+        && request.resource.data.keys().hasOnly(['courseId', 'itemId', 'testTitle', 'studentId', 'studentName', 'answers', 'submittedAt'])
+      );
+      allow update, delete: if isAdmin();
     }
 
     match /batches/{id} {
@@ -42,44 +101,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    match /materials/{id} {
-      allow read: if member();
-      allow write: if isAdmin();
-    }
-
-    // Tests: student sirf "Live" test dekh sakta hai
-    match /tests/{id} {
-      allow read: if isAdmin() || (isStudent() && resource.data.published == true);
-      allow write: if isAdmin();
-    }
-
-    // Sahi uttar: student ko sirf test submit karne ke BAAD dikhte hain
-    match /testKeys/{testId} {
-      allow read: if isAdmin() || (isStudent() &&
-        exists(/databases/$(database)/documents/results/$(testId + '_' + request.auth.uid)));
-      allow write: if isAdmin();
-    }
-
-    // Result: ek test ek hi baar (update allowed nahi)
-    match /results/{id} {
-      allow get: if isAdmin() || (signedIn() && id.matches('.*_' + request.auth.uid + '$'));
-      allow list: if isAdmin() || (signedIn() && resource.data.studentId == request.auth.uid);
-      allow create: if isAdmin() || (
-        isStudent()
-        && request.resource.data.studentId == request.auth.uid
-        && id == request.resource.data.testId + '_' + request.auth.uid
-        && get(/databases/$(database)/documents/tests/$(request.resource.data.testId)).data.published == true
-        && request.resource.data.keys().hasOnly(['testId', 'testTitle', 'studentId', 'studentName', 'answers', 'submittedAt'])
-      );
-      allow update, delete: if isAdmin();
-    }
-
     match /attendance/{id} {
       allow read: if member();
       allow write: if isAdmin();
     }
 
-    // Fees: student sirf apni "pending" entry bhej sakta hai, verify admin karega
+    // Offline coaching ki monthly fees (UPI + UTR)
     match /payments/{id} {
       allow read: if isAdmin() || (signedIn() && resource.data.studentId == request.auth.uid);
       allow create: if isAdmin() || (
@@ -92,7 +119,6 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    // Admission enquiry form — koi bhi bhej sakta hai, sirf admin padhega
     match /enquiries/{id} {
       allow create: if request.resource.data.name is string
         && request.resource.data.name.size() < 100

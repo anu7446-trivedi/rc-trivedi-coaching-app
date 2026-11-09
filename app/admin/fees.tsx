@@ -10,7 +10,7 @@ import { C } from "../../lib/theme";
 export default function AdminFees() {
   const { data, loading, reload } = useLoad(async () => {
     const [payments, students] = await Promise.all([getPayments(), getStudents()]);
-    return { payments, students: students.filter((s) => s.active).sort((a, b) => a.name.localeCompare(b.name)) };
+    return { payments, students: students.filter((s) => s.active && !!s.batchId).sort((a, b) => a.name.localeCompare(b.name)) };
   });
   const [tab, setTab] = useState<"pending" | "all" | "due" | "cash">("pending");
   const [month, setMonth] = useState(thisMonth());
@@ -70,7 +70,7 @@ export default function AdminFees() {
           {due.length === 0 ? <Empty text="Sabki fees jama hai 🎉" /> : null}
           {due.map((s) => (
             <View key={s.id} style={{ backgroundColor: "#fff", padding: 14, borderRadius: 12, marginBottom: 8, flexDirection: "row", justifyContent: "space-between" }}>
-              <Text style={{ fontWeight: "800", color: C.text }}>{s.name} • {s.mobile}</Text>
+              <Text style={{ fontWeight: "800", color: C.text }}>{s.name} • {s.phone}</Text>
               <Text style={{ fontWeight: "900", color: C.red }}>₹{s.monthlyFee || 0}</Text>
             </View>
           ))}

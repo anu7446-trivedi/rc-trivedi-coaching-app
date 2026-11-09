@@ -1,15 +1,19 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from "firebase/auth";
-import { auth, isConfigured } from "./firebase";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  FirebaseAuthTypes, onAuthStateChanged, signInWithEmailAndPassword, signInWithPhoneNumber, signOut,
+} from "@react-native-firebase/auth";
+import { auth } from "./firebase";
 import { ADMIN_EMAILS } from "../firebaseConfig";
-import { getStudent, mobileToEmail, Student } from "./db";
+import { getStudent, Student } from "./db";
 
+type User = FirebaseAuthTypes.User;
 type Ctx = {
   user: User | null;
   isAdmin: boolean;
   student: Student | null;
   loading: boolean;
-  loginStudent: (mobile: string, password: string) => Promise<void>;
+  sendOtp: (mobile10: string) => Promise<void>;
+  confirmOtp: (code: string) => Promise<void>;
   loginAdmin: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshStudent: () => Promise<void>;
@@ -17,59 +21,57 @@ type Ctx = {
 
 const AuthCtx = createContext<Ctx>(null as unknown as Ctx);
 export const useAuth = () => useContext(AuthCtx);
-
 const adminSet = new Set(ADMIN_EMAILS.map((e) => e.toLowerCase()));
+const isAdminUser = (u: User | null) => !!u?.email && adminSet.has(u.email.toLowerCase());
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [student, setStudent] = useState<Student | null>(null);
-  const [loading, setLoading] = useState(isConfigured);
-
-  const isAdmin = !!user?.email && adminSet.has(user.email.toLowerCase());
+  const [loading, setLoading] = useState(true);
+  const confirmation = useRef<FirebaseAuthTypes.ConfirmationResult | null>(null);
 
   const loadStudent = async (u: User | null) => {
-    if (!u || (u.email && adminSet.has(u.email.toLowerCase()))) return setStudent(null);
+    if (!u || isAdminUser(u)) return setStudent(null);
     try { setStudent(await getStudent(u.uid)); } catch { setStudent(null); }
   };
 
-  useEffect(() => {
-    if (!isConfigured) return;
-    return onAuthStateChanged(auth, async (u) => {
-      setUser(u);
-      await loadStudent(u);
-      setLoading(false);
-    });
-  }, []);
+  useEffect(() => onAuthStateChanged(auth, async (u) => {
+    setUser(u);
+    await loadStudent(u);
+    setLoading(false);
+  }), []);
 
   const value: Ctx = {
-    user, isAdmin, student, loading,
-    loginStudent: async (mobile, password) => {
-      const cred = await signInWithEmailAndPassword(auth, mobileToEmail(mobile), password);
-      const s = await getStudent(cred.user.uid);
-      if (!s || !s.active) {
-        await signOut(auth);
-        throw new Error("Aapka account active nahi hai. Coaching se sampark karein.");
-      }
-      setStudent(s);
+    user, isAdmin: isAdminUser(user), student, loading,
+    sendOtp: async (mobile10) => {
+      confirmation.current = await signInWithPhoneNumber(auth, `+91${mobile10}`);
+    },
+    confirmOtp: async (code) => {
+      if (!confirmation.current) throw new Error("Pehle OTP mangwaiye.");
+      await confirmation.current.confirm(code);
     },
     loginAdmin: async (email, password) => {
-      if (!adminSet.has(email.trim().toLowerCase())) throw new Error("Ye email admin list me nahi hai (firebaseConfig.ts).");
+      if (!adminSet.has(email.trim().toLowerCase())) throw new Error("Ye email admin list me nahi hai.");
       await signInWithEmailAndPassword(auth, email.trim(), password);
     },
     logout: () => signOut(auth),
-    refreshStudent: () => loadStudent(user),
+    refreshStudent: () => loadStudent(auth.currentUser),
   };
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
 
 export function authErrorHi(e: any): string {
   const c: string = e?.code ?? "";
+  if (c.includes("invalid-verification-code")) return "OTP galat hai. Dobara dekh kar daalein.";
+  if (c.includes("session-expired") || c.includes("code-expired")) return "OTP ka samay khatam ho gaya. Naya OTP mangwaiye.";
+  if (c.includes("invalid-phone-number")) return "Mobile number sahi nahi hai.";
+  if (c.includes("quota-exceeded")) return "Aaj ke OTP ki seema khatam ho gayi. Coaching se sampark karein.";
   if (c.includes("invalid-credential") || c.includes("wrong-password") || c.includes("user-not-found"))
-    return "Mobile/Email ya Password galat hai.";
-  if (c.includes("email-already-in-use")) return "Is mobile number ka account pehle se bana hua hai.";
-  if (c.includes("weak-password")) return "Password kam se kam 6 akshar ka hona chahiye.";
-  if (c.includes("too-many-requests")) return "Bahut baar galat try hua. Thodi der baad try karein.";
+    return "Email ya Password galat hai.";
+  if (c.includes("too-many-requests")) return "Bahut baar try hua. Thodi der baad try karein.";
   if (c.includes("network")) return "Internet connection check karein.";
-  if (c.includes("permission-denied")) return "Permission nahi hai (Firestore rules check karein).";
+  if (c.includes("permission-denied")) return "Permission nahi hai.";
+  if (c.includes("app-not-authorized") || c.includes("missing-client-identifier"))
+    return "OTP setup adhoora hai (Firebase me SHA key). Coaching se sampark karein.";
   return e?.message ?? "Kuch galat ho gaya.";
 }

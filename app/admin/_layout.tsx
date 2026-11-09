@@ -10,16 +10,18 @@ export default function AdminLayout() {
   return (
     <Stack screenOptions={{ headerStyle: { backgroundColor: C.maroon }, headerTintColor: "#fff", headerTitleStyle: { fontWeight: "800" } }}>
       <Stack.Screen name="index" options={{ title: "Admin Panel" }} />
+      <Stack.Screen name="courses" options={{ title: "Courses" }} />
+      <Stack.Screen name="course-edit" options={{ title: "Course" }} />
+      <Stack.Screen name="course-content" options={{ title: "Course Content" }} />
+      <Stack.Screen name="item-edit" options={{ title: "Content Jodein" }} />
+      <Stack.Screen name="test-results" options={{ title: "Test Results" }} />
       <Stack.Screen name="students" options={{ title: "Students" }} />
-      <Stack.Screen name="student-form" options={{ title: "Student" }} />
+      <Stack.Screen name="student-edit" options={{ title: "Student" }} />
+      <Stack.Screen name="orders" options={{ title: "Sales / Kamai" }} />
       <Stack.Screen name="batches" options={{ title: "Batches" }} />
       <Stack.Screen name="notices" options={{ title: "Notices" }} />
-      <Stack.Screen name="material" options={{ title: "Notes & Videos" }} />
-      <Stack.Screen name="tests" options={{ title: "Tests" }} />
-      <Stack.Screen name="test-edit" options={{ title: "Test Banayein" }} />
-      <Stack.Screen name="test-results" options={{ title: "Test Results" }} />
       <Stack.Screen name="attendance" options={{ title: "Attendance" }} />
-      <Stack.Screen name="fees" options={{ title: "Fees" }} />
+      <Stack.Screen name="fees" options={{ title: "Coaching Fees" }} />
       <Stack.Screen name="enquiries" options={{ title: "Admission Enquiries" }} />
       <Stack.Screen name="settings" options={{ title: "App Settings" }} />
     </Stack>

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Text } from "react-native";
-import { addNotice, deleteNotice, fmtDate, getBatches, getNotices } from "../../lib/db";
+import { addNotice, deleteNotice, fmtDate, getAllNotices, getBatches } from "../../lib/db";
 import { useLoad } from "../../lib/useLoad";
 import BatchPicker from "../../components/BatchPicker";
 import { Btn, Card, Empty, Input, Label, Loading, Screen, confirm, notify } from "../../components/ui";
 import { C } from "../../lib/theme";
 
 export default function AdminNotices() {
-  const { data, loading, reload } = useLoad(async () => ({ notices: await getNotices(), batches: await getBatches() }));
+  const { data, loading, reload } = useLoad(async () => ({ notices: await getAllNotices(), batches: await getBatches() }));
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [batchId, setBatchId] = useState("all");
