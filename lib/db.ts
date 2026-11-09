@@ -149,19 +149,19 @@ export async function seedCourses() {
   const mk = async (category: Category, title: string, subtitle: string, price: number, mrp: number, order: number, extra: Partial<Course> = {}) => {
     ids[category] = await saveCourse({ ...base, category, title, subtitle, price, mrp, order, ...extra });
   };
-  await mk("maths", "Ganit (Maths) Course — Class 6 Entrance", "JNV / Sainik / Vidyagyan ke liye", 599, 0, 2);
-  await mk("reasoning", "Reasoning (Mansik Yogyata) Course", "Mental Ability — chapterwise", 299, 0, 3);
-  await mk("hindi", "Hindi (Bhasha) Course", "Gadyansh, vyakaran, shabd gyan", 299, 0, 4);
-  await mk("evs", "EVS / Paryavaran Adhyayan Course", "Vigyan + Samajik Adhyayan", 299, 0, 5);
-  await mk("tests", "Topic-wise Test Series — Sabhi Vishay", "Har topic ke alag test", 399, 0, 6);
+  await mk("maths", "Ganit (Maths) Course — Class 6 Entrance", "JNV / Sainik / Vidyagyan ke liye", 599, 999, 2);
+  await mk("reasoning", "Reasoning (Mansik Yogyata) Course", "Mental Ability — chapterwise", 299, 499, 3);
+  await mk("hindi", "Hindi (Bhasha) Course", "Gadyansh, vyakaran, shabd gyan", 299, 499, 4);
+  await mk("evs", "EVS / Paryavaran Adhyayan Course", "Vigyan + Samajik Adhyayan", 299, 499, 5);
+  await mk("tests", "Topic-wise Test Series — Sabhi Vishay", "Har topic ke alag test", 399, 665, 6);
   const topicTests = ids.tests;
-  await mk("tests", "50 Model Test Paper", "Poore pariksha pattern par 50 model paper", 499, 0, 7);
+  await mk("tests", "50 Model Test Paper", "Poore pariksha pattern par 50 model paper", 499, 832, 7);
   const modelPapers = ids.tests;
   await mk("free", "Free Mock Test & Notes", "Muft abhyas", 0, 0, 8, { published: true });
-  await mk("full", "Sampoorn Course — Video Classes ke saath (Sab Vishay)", "Maths + Reasoning + Hindi + EVS", 2399, 0, 1, {
-    includes: [ids.maths, ids.reasoning, ids.hindi, ids.evs], featured: true,
+  await mk("full", "Sampoorn Course — Video Classes ke saath (Sab Vishay)", "Maths + Reasoning + Hindi + EVS + Topic Tests + 50 Model Paper", 2399, 3999, 1, {
+    includes: [ids.maths, ids.reasoning, ids.hindi, ids.evs, topicTests, modelPapers], featured: true,
+    description: "🎯 Sab kuch ek saath — alag-alag khareedne se sasta!\n📚 Maths, Reasoning, Hindi, EVS — video classes + PDF notes\n📝 Topic-wise Test Series\n📄 50 Model Test Paper\n⏰ 365 din ki validity",
   });
-  void topicTests; void modelPapers;
 }
 
 // ---------- Course items (video / pdf / test ...) ----------
