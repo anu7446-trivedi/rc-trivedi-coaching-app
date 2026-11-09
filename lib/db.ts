@@ -118,8 +118,10 @@ export async function uploadImage(localUri: string, folder: string) {
 }
 
 // ---------- Students ----------
-export const getStudents = () => list<Student>("students");
-export const getStudent = (id: string) => one<Student>("students", id);
+// Purane (password wale) students me "mobile" field tha — dono ko sambhalo
+const normStudent = (s: any): Student => ({ ...s, phone: s.phone ?? (s.mobile ? `+91${s.mobile}` : ""), name: s.name ?? "" });
+export const getStudents = async () => (await list<any>("students")).map(normStudent);
+export const getStudent = async (id: string) => { const s = await one<any>("students", id); return s ? normStudent(s) : null; };
 export const createMyProfile = (uid: string, p: Omit<Student, "id" | "active" | "createdAt">) =>
   setDoc(doc(db, "students", uid), { ...p, active: true, createdAt: serverTimestamp() });
 export const updateStudent = (id: string, data: Partial<Student>) => updateDoc(doc(db, "students", id), data as any);
