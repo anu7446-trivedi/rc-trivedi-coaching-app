@@ -8,7 +8,7 @@ import { useLoad } from "../../lib/useLoad";
 import { Btn, Row, Screen } from "../../components/ui";
 import { C } from "../../lib/theme";
 
-const PRIVACY = "https://github.com/anu7446-trivedi/rc-trivedi-coaching-app/blob/main/PRIVACY_POLICY.md";
+const PRIVACY = "https://rc-trivedi-coaching.web.app/privacy.html";
 
 export default function More() {
   const { student, logout } = useAuth();
