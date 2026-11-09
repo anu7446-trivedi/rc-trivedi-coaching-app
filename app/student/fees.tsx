@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Linking, Text, View } from "react-native";
+import * as Clipboard from "expo-clipboard";
 import { useAuth } from "../../lib/auth";
 import { addPayment, fmtDate, getMyPayments, getSettings, thisMonth, upiLink } from "../../lib/db";
 import { useLoad } from "../../lib/useLoad";
@@ -52,11 +53,23 @@ export default function Fees() {
 
       <Card>
         <Label>💳 Online Fees Jama Karein (UPI)</Label>
-        <Sub>1) "UPI se Pay" dabayein → PhonePe/GPay/Paytm me pay karein.{"\n"}2) Wapas aakar UTR / Transaction ID daal kar Submit karein.</Sub>
         <Input label="Amount (₹)" keyboardType="numeric" value={amount} onChangeText={setAmount} />
         <Input label="Kis mahine ki fees (YYYY-MM)" value={month} onChangeText={setMonth} />
-        <Btn title="UPI se Pay Karein" icon="phone-portrait-outline" color={C.green} onPress={payUpi} />
-        {settings.upiId ? <Text style={{ color: C.sub, fontSize: 12, textAlign: "center", marginBottom: 8 }}>UPI ID: {settings.upiId}</Text> : null}
+        {settings.upiId ? (
+          <View style={{ backgroundColor: C.light, borderRadius: 12, padding: 12, marginBottom: 10 }}>
+            <Text style={{ fontWeight: "900", color: C.navy, marginBottom: 4 }}>Tarika 1 (sabse pakka):</Text>
+            <Text style={{ color: C.text, lineHeight: 20 }}>
+              1) Neeche "UPI ID Copy" dabayein{"\n"}2) PhonePe / GPay / Paytm kholein → "Pay to UPI ID" / "To UPI ID"{"\n"}3) UPI ID paste karke ₹{amount || "…"} bhejein{"\n"}4) Wapas aakar UTR number daal kar Submit karein
+            </Text>
+            <Text selectable style={{ fontWeight: "900", fontSize: 16, color: C.blue, marginVertical: 8, textAlign: "center" }}>{settings.upiId}</Text>
+            <Btn title="UPI ID Copy Karein" icon="copy-outline" onPress={async () => { await Clipboard.setStringAsync(settings.upiId); notify("Copy ho gaya ✓", "Ab UPI app me 'Pay to UPI ID' me paste karein."); }} />
+            <Text style={{ fontWeight: "900", color: C.navy, marginTop: 8 }}>Tarika 2:</Text>
+            <Btn title="Seedha UPI App kholein" icon="phone-portrait-outline" color={C.green} outline onPress={payUpi} />
+            <Text style={{ color: C.sub, fontSize: 11, textAlign: "center" }}>Agar UPI app "declined for security reasons" bole, to Tarika 1 use karein.</Text>
+          </View>
+        ) : (
+          <Sub>Online payment abhi chalu nahi hai. Coaching par cash jama karein.</Sub>
+        )}
         <Input label="UTR / Transaction ID" value={utr} onChangeText={setUtr} placeholder="12 digit UTR number" />
         <Btn title="Payment Submit Karein" icon="send" onPress={submit} loading={busy} />
       </Card>

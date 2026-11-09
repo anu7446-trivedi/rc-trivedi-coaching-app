@@ -32,7 +32,7 @@ export default function AppSettings() {
       </Card>
       <Card>
         <Label>💳 Online Fees (UPI)</Label>
-        <Sub>Aapki UPI ID (jaise 9005167446@ybl). Students isi par fees bhejenge — paisa seedha aapke bank me aayega, koi charge nahi.</Sub>
+        <Sub>Aapki UPI ID (jaise 9005167446@ybl). Students isi par fees bhejenge — paisa seedha aapke bank me aayega. Tip: PhonePe Business / Paytm Business / GPay Business ki (free) merchant UPI ID daalenge to "UPI App kholein" button bhi bina rukawat chalega. Personal UPI ID par students ko "UPI ID Copy" wala tarika use karna hoga.</Sub>
         <Input label="UPI ID" autoCapitalize="none" value={s.upiId} onChangeText={set("upiId")} placeholder="name@okaxis" />
         <Input label="UPI par naam" value={s.upiName} onChangeText={set("upiName")} />
       </Card>
