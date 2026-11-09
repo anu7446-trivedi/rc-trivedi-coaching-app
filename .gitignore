@@ -14,3 +14,4 @@ service-account*.json
 npm-debug.*
 android/
 ios/
+.firebase/
