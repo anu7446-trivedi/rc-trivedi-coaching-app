@@ -1,0 +1,46 @@
+# GitHub par "Actions" tab → "Android App Build" → "Run workflow" dabakar
+# app ki APK (testing ke liye) ya AAB (Play Store ke liye) banwa sakte hain.
+# Iske liye ek baar repo Settings → Secrets → Actions me EXPO_TOKEN daalna hoga.
+name: Android App Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "preview = APK (phone par test) | production = AAB (Play Store)"
+        required: true
+        default: preview
+        type: choice
+        options: [preview, production]
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+
+  build:
+    if: github.event_name == 'workflow_dispatch'
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - run: eas build --platform android --profile ${{ inputs.profile }} --non-interactive --no-wait
