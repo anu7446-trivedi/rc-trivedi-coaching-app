@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://rc-trivedi-coaching.web.app/sitemap.xml
