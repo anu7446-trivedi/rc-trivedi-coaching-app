@@ -1,0 +1,19 @@
+{
+  "project_info": {
+    "project_number": "2257172402",
+    "project_id": "rc-trivedi-coaching",
+    "storage_bucket": "rc-trivedi-coaching.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2257172402:android:014693457de8941876d6ab",
+        "android_client_info": { "package_name": "com.rctrivedi.coaching" }
+      },
+      "oauth_client": [],
+      "api_key": [{ "current_key": "AIzaSyDzwO0iRAMK9BDeCVVgTHfVzouX0kuyznQ" }],
+      "services": { "appinvite_service": { "other_platform_oauth_client": [] } }
+    }
+  ],
+  "configuration_version": "1"
+}
