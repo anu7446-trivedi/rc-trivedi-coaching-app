@@ -173,7 +173,7 @@ export async function seedCourses() {
   await mk("tests", "50 Model Test Paper", "Poore pariksha pattern par 50 model paper", 499, 832, 7);
   const modelPapers = ids.tests;
   await mk("free", "Free Mock Test & Notes", "Muft abhyas", 0, 0, 8, { published: true });
-  await mk("full", "Sampoorn Course — Video Classes ke saath (Sab Vishay)", "Maths + Reasoning + Hindi + EVS + Topic Tests + 50 Model Paper", 2399, 3999, 1, {
+  await mk("full", "Sampoorn Course — Video Classes ke saath (Sab Vishay)", "Maths + Reasoning + Hindi + EVS + Topic Tests + 50 Model Paper", 1999, 3332, 1, {
     includes: [ids.maths, ids.reasoning, ids.hindi, ids.evs, topicTests, modelPapers], featured: true,
     description: "🎯 Sab kuch ek saath — alag-alag khareedne se sasta!\n📚 Maths, Reasoning, Hindi, EVS — video classes + PDF notes\n📝 Topic-wise Test Series\n📄 50 Model Test Paper\n⏰ 365 din ki validity",
   });
