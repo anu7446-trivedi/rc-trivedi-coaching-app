@@ -111,6 +111,13 @@ export async function getSettings(): Promise<Settings> {
 export const saveSettings = (s: Settings) => setDoc(doc(db, "settings", "app"), s);
 
 // ---------- Image upload (Firebase Storage) ----------
+/** PDF / photo jaisi file Firebase Storage me upload karke uska link deta hai. */
+export async function uploadFile(localUri: string, folder: string, fileName: string, contentType: string) {
+  const safe = fileName.replace(/[^A-Za-z0-9._-]+/g, "_").slice(-60) || "file";
+  const r = ref(storage, `files/${folder}/${Date.now()}_${safe}`);
+  await putFile(r, localUri, { contentType });
+  return getDownloadURL(r);
+}
 export async function uploadImage(localUri: string, folder: string) {
   const r = ref(storage, `images/${folder}/${Date.now()}.jpg`);
   await putFile(r, localUri);

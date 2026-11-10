@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { getItem, getItems, getTestKey, ItemType, Question, saveItem } from "../../lib/db";
+import * as DocumentPicker from "expo-document-picker";
+import { getItem, getItems, getTestKey, ItemType, Question, saveItem, uploadFile } from "../../lib/db";
 import { Btn, Card, Chip, Input, Label, Loading, Screen, Sub, confirm, notify } from "../../components/ui";
 import { C } from "../../lib/theme";
 
@@ -12,7 +13,7 @@ const TYPES: { k: ItemType; l: string }[] = [
 const HELP: Record<ItemType, string> = {
   video: "YouTube par video 'Unlisted' upload karein → Share → link copy karke yahan daalein. Video app ke andar chalega.",
   live: "YouTube par Live shuru karein (Unlisted) → uska link yahan daalein. Class ke samay students yahin se dekhenge.",
-  pdf: "PDF ko Google Drive par upload karein → Share → 'Anyone with the link' → link copy karke yahan daalein.",
+  pdf: "Neeche button se phone ki PDF / photo seedha upload karein. (Ya Google Drive ka link bhi daal sakte hain.)",
   link: "Koi bhi website / Google Form ka link.",
   test: "",
 };
@@ -54,6 +55,7 @@ export default function ItemEdit() {
   const [bulk, setBulk] = useState("");
   const [showBulk, setShowBulk] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     getItems(cid).then((its) => setSections([...new Set(its.map((i) => i.section).filter(Boolean) as string[])]));
@@ -113,6 +115,22 @@ export default function ItemEdit() {
         {type !== "test" ? (
           <>
             <Sub>{HELP[type]}</Sub>
+            {type === "pdf" ? (
+              <Btn title={uploading ? "Upload ho raha hai…" : url ? "✓ File lagi hai — badalne ke liye dabayein" : "📎 Phone se PDF / Photo chunein"}
+                icon="cloud-upload-outline" color={url ? C.green : C.blue} loading={uploading} onPress={async () => {
+                  const r = await DocumentPicker.getDocumentAsync({ type: ["application/pdf", "image/*"], copyToCacheDirectory: true });
+                  if (r.canceled || !r.assets?.[0]) return;
+                  const f = r.assets[0];
+                  if ((f.size ?? 0) > 25 * 1024 * 1024) return notify("File bahut badi hai", "25 MB se chhoti file chunein.");
+                  setUploading(true);
+                  try {
+                    setUrl(await uploadFile(f.uri, `materials/${cid}`, f.name || "notes.pdf", f.mimeType || "application/pdf"));
+                    if (!title.trim()) setTitle((f.name || "").replace(/\.[a-z0-9]+$/i, ""));
+                    notify("Upload ho gaya ✓", "Ab 'Save Karein' dabayein.");
+                  } catch (e: any) { notify("Upload nahi hua", e?.message); }
+                  finally { setUploading(false); }
+                }} />
+            ) : null}
             <Input label="Link *" autoCapitalize="none" keyboardType="url" value={url} onChangeText={setUrl} placeholder="https://…" />
           </>
         ) : (

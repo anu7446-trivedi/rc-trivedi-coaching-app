@@ -9,5 +9,13 @@ service firebase.storage {
         && request.resource.size < 5 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
     }
+    // Course ki PDF / notes — sirf admin upload kare
+    match /files/{all=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email in ['rct.anurag.2015@gmail.com']
+        && request.resource.size < 25 * 1024 * 1024
+        && (request.resource.contentType == 'application/pdf' || request.resource.contentType.matches('image/.*'));
+    }
   }
 }
