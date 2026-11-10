@@ -5,18 +5,18 @@
     "version": "5.0.0",
     "scheme": "rctrivedi",
     "orientation": "portrait",
-    "icon": "./assets/logo.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/logo.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#071B3A"
+      "backgroundColor": "#002152"
     },
     "android": {
       "package": "com.rctrivedi.coaching",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo.png",
-        "backgroundColor": "#071B3A"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#002152"
       },
       "permissions": [],
       "googleServicesFile": "./google-services.json"
