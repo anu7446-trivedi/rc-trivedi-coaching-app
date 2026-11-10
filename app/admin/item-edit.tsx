@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
-import { getItem, getItems, getTestKey, ItemType, Question, saveItem, uploadFile } from "../../lib/db";
+import { getItem, getItems, getTestKey, ItemType, Question, saveItem, storagePathOf, uploadFile } from "../../lib/db";
 import { Btn, Card, Chip, Input, Label, Loading, Screen, Sub, confirm, notify } from "../../components/ui";
 import { C } from "../../lib/theme";
 
@@ -85,7 +85,7 @@ export default function ItemEdit() {
       if (!questions.length) return notify("Kam se kam 1 prashn daalein");
       const bad = questions.findIndex((q) => q.options.filter((o) => o.trim()).length < 2 || !q.options[q.answer ?? 0]?.trim());
       if (bad >= 0) return notify(`Prashn ${bad + 1} check karein`, "Kam se kam 2 option aur sahi uttar wala option bhara ho.");
-    } else if (!/^https?:\/\//.test(url.trim())) return notify("Sahi link daalein (https://…)");
+    } else if (!storagePathOf(url) && !/^https?:\/\//.test(url.trim())) return notify(type === "pdf" ? "Pehle PDF / photo upload karein" : "Sahi link daalein (https://…)");
     setBusy(true);
     try {
       await saveItem(cid, {
@@ -131,7 +131,9 @@ export default function ItemEdit() {
                   finally { setUploading(false); }
                 }} />
             ) : null}
-            <Input label="Link *" autoCapitalize="none" keyboardType="url" value={url} onChangeText={setUrl} placeholder="https://…" />
+            {storagePathOf(url) ? null : (
+              <Input label={type === "pdf" ? "Ya Google Drive link (optional)" : "Link *"} autoCapitalize="none" keyboardType="url" value={url} onChangeText={setUrl} placeholder="https://…" />
+            )}
           </>
         ) : (
           <Input label="Samay (minute)" keyboardType="numeric" value={duration} onChangeText={setDuration} />

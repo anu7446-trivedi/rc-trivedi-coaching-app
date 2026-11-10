@@ -18,6 +18,7 @@ export default function Layout() {
           <Stack.Screen name="course/[id]" options={{ title: "Course" }} />
           <Stack.Screen name="learn/[cid]" options={{ title: "Course Content" }} />
           <Stack.Screen name="learn/video" options={{ title: "Video" }} />
+          <Stack.Screen name="learn/doc" options={{ title: "Notes" }} />
           <Stack.Screen name="learn/test" options={{ title: "Test" }} />
           <Stack.Screen name="student" options={{ headerShown: false }} />
           <Stack.Screen name="admin" options={{ headerShown: false }} />

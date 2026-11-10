@@ -3,7 +3,7 @@ import {
   serverTimestamp, increment, Timestamp,
 } from "@react-native-firebase/firestore";
 import { httpsCallable } from "@react-native-firebase/functions";
-import { getDownloadURL, ref, putFile } from "@react-native-firebase/storage";
+import { deleteObject, getDownloadURL, ref, putFile } from "@react-native-firebase/storage";
 import { db, functions, storage } from "./firebase";
 
 type TS = { toMillis(): number; toDate(): Date };
@@ -114,9 +114,17 @@ export const saveSettings = (s: Settings) => setDoc(doc(db, "settings", "app"), 
 /** PDF / photo jaisi file Firebase Storage me upload karke uska link deta hai. */
 export async function uploadFile(localUri: string, folder: string, fileName: string, contentType: string) {
   const safe = fileName.replace(/[^A-Za-z0-9._-]+/g, "_").slice(-60) || "file";
-  const r = ref(storage, `files/${folder}/${Date.now()}_${safe}`);
-  await putFile(r, localUri, { contentType });
-  return getDownloadURL(r);
+  const path = `files/${folder}/${Date.now()}_${safe}`;
+  await putFile(ref(storage, path), localUri, { contentType });
+  // Public download link nahi banate — file sirf app ke andar, login ke saath khulti hai.
+  return `storage://${path}`;
+}
+/** Item ke url se Firebase Storage ka path nikalta hai (nahi to null). */
+export function storagePathOf(url?: string): string | null {
+  if (!url) return null;
+  if (url.startsWith("storage://")) return url.slice("storage://".length);
+  const m = url.match(/firebasestorage\.googleapis\.com\/v0\/b\/[^/]+\/o\/([^?]+)/);
+  return m ? decodeURIComponent(m[1]) : null;
 }
 export async function uploadImage(localUri: string, folder: string) {
   const r = ref(storage, `images/${folder}/${Date.now()}.jpg`);
@@ -207,6 +215,8 @@ export async function saveItem(courseId: string, it: Omit<Item, "id" | "courseId
 }
 export async function deleteItem(courseId: string, it: Item) {
   await deleteDoc(doc(db, `courses/${courseId}/items`, it.id));
+  const sp = storagePathOf(it.url);
+  if (sp) await deleteObject(ref(storage, sp)).catch(() => {});
   if (it.type === "test") await deleteDoc(doc(db, `courses/${courseId}/keys`, it.id)).catch(() => {});
   await updateDoc(doc(db, "courses", courseId), { [`counts.${it.type}`]: increment(-1) });
 }

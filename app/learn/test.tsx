@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
+import { usePreventScreenCapture } from "expo-screen-capture";
 import { useAuth } from "../../lib/auth";
 import { getItem, getMyResult, getTestKey, Item, Result, score, submitResult } from "../../lib/db";
 import { Btn, Card, Loading, Screen, confirm, notify } from "../../components/ui";
@@ -8,6 +9,7 @@ import { C } from "../../lib/theme";
 
 export default function TakeTest() {
   const { cid, iid } = useLocalSearchParams<{ cid: string; iid: string }>();
+  usePreventScreenCapture();
   const { student } = useAuth();
   const [test, setTest] = useState<Item | null>(null);
   const [result, setResult] = useState<Result | null>(null);
