@@ -35,9 +35,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try { setStudent(await getStudent(u.uid)); } catch { setStudent(null); }
   };
 
+  // Pehle student profile load karo, phir user set karo — warna app galti se
+  // "Apni Jaankari" (register) page khol deta tha jabki profile pehle se hai.
   useEffect(() => onAuthStateChanged(auth, async (u) => {
-    setUser(u);
+    setLoading(true);
     await loadStudent(u);
+    setUser(u);
     setLoading(false);
   }), []);
 

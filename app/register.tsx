@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
-import { createMyProfile } from "../lib/db";
+import { createMyProfile, getStudent } from "../lib/db";
 import { useAuth } from "../lib/auth";
 import { Btn, Card, H, Input, Screen, Sub, notify } from "../components/ui";
 import { C } from "../lib/theme";
 
 export default function Register() {
-  const { user, refreshStudent, logout } = useAuth();
+  const { user, student, refreshStudent, logout } = useAuth();
+  // Profile pehle se ho to seedha aage
+  useEffect(() => { if (student) router.replace("/student"); }, [student]);
   const [name, setName] = useState("");
   const [fatherName, setFatherName] = useState("");
   const [className, setClassName] = useState("");
@@ -19,6 +21,7 @@ export default function Register() {
     if (name.trim().length < 2) return notify("Student ka naam likhein");
     setBusy(true);
     try {
+      if (await getStudent(user.uid)) { await refreshStudent(); router.replace("/student"); return; }
       await createMyProfile(user.uid, {
         name: name.trim(), phone: user.phoneNumber ?? "", fatherName: fatherName.trim(),
         className: className.trim(), address: address.trim(),
