@@ -4,7 +4,7 @@ import {
 } from "@react-native-firebase/firestore";
 import { httpsCallable } from "@react-native-firebase/functions";
 import { deleteObject, getDownloadURL, ref, putFile } from "@react-native-firebase/storage";
-import { db, functions, storage } from "./firebase";
+import { auth, db, functions, storage } from "./firebase";
 
 type TS = { toMillis(): number; toDate(): Date };
 
@@ -14,6 +14,8 @@ export type Settings = {
   name: string; tagline: string; address: string; phone: string; whatsapp: string;
   upiId: string; upiName: string; about: string; courses: string[]; banners: Banner[];
   privacyUrl?: string;
+  /** false = app me "Buy Now" ki jagah "Sampark karein" (Play Store suraksha switch) */
+  buyEnabled?: boolean;
 };
 export type Student = {
   id: string; name: string; phone: string; fatherName?: string; className?: string;
@@ -142,6 +144,14 @@ export const createMyProfile = (uid: string, p: Omit<Student, "id" | "active" | 
 export const updateStudent = (id: string, data: Partial<Student>) => updateDoc(doc(db, "students", id), data as any);
 export const updateMyProfile = (id: string, data: Pick<Student, "name" | "fatherName" | "className" | "address">) =>
   updateDoc(doc(db, "students", id), data as any);
+
+/** Student apna account khud delete kare (Play Store niyam). Payment records kanoon ke liye rehte hain. */
+export async function deleteMyAccount() {
+  const u = auth.currentUser;
+  if (!u) throw new Error("Login nahi hai");
+  await deleteDoc(doc(db, "students", u.uid));
+  await u.delete();
+}
 
 // ---------- Courses ----------
 export async function getCourses(includeDrafts = false) {

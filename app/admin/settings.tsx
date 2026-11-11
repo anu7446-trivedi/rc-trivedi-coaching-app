@@ -35,6 +35,15 @@ export default function AppSettings() {
         <Input label="Privacy Policy link (optional)" autoCapitalize="none" value={s.privacyUrl ?? ""} onChangeText={set("privacyUrl")} />
       </Card>
       <Card>
+        <Label>🛒 App me "Buy Now" (online payment)</Label>
+        <Sub>Band karne par students ko "Buy Now" ki jagah "Sampark Karein" (WhatsApp) dikhega. Kabhi Google Play aapatti kare to ise band kar dein — naya APK nahi chahiye.</Sub>
+        <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+          <Chip label="✅ Chalu (Razorpay)" active={s.buyEnabled !== false} onPress={() => setS({ ...s, buyEnabled: true })} />
+          <Chip label="⛔ Band (Sampark Karein)" active={s.buyEnabled === false} onPress={() => setS({ ...s, buyEnabled: false })} />
+        </View>
+        <Sub>Badlav ke baad neeche "Save Karein" dabayein.</Sub>
+      </Card>
+      <Card>
         <Label>🖼️ Home Page Banners</Label>
         <Sub>Banner photo chaudi (2:1, jaise 1200×600) rakhein. Har banner kisi course se jod sakte hain.</Sub>
         {s.banners.map((b, i) => (

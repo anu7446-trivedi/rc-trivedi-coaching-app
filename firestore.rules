@@ -42,7 +42,8 @@ service cloud.firestore {
         signedIn() && request.auth.uid == uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'fatherName', 'className', 'address'])
       );
-      allow delete: if isAdmin();
+      // Student apna account khud delete kar sakta hai (Play Store niyam)
+      allow delete: if isAdmin() || (signedIn() && request.auth.uid == uid);
     }
 
     // Courses: Live course sab dekh sakte hain (bina login bhi)

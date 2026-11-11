@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import RazorpayCheckout from "react-native-razorpay";
@@ -35,6 +35,7 @@ export default function CourseDetail() {
   if (!course) return <Screen><Text>Course nahi mila.</Text></Screen>;
   const owned = isActive(enr);
   const canOpen = owned || isFree(course);
+  const buyOff = settings.buyEnabled === false;
 
   // Payment ke baad course khula ya nahi — server (webhook) se pakki jaankari, kuch second tak dekhte hain.
   const waitForAccess = async (tries = 8) => {
@@ -136,10 +137,12 @@ export default function CourseDetail() {
         <View style={{ flex: 1 }}>{owned ? <Text style={[s.title, { color: C.green, fontSize: 16 }]}>✓ Khareeda hua</Text> : <PriceLine course={course} big />}</View>
         <Pressable
           disabled={busy}
-          onPress={() => (canOpen ? router.push({ pathname: "/learn/[cid]", params: { cid: course.id } }) : buy())}
+          onPress={() => (canOpen ? router.push({ pathname: "/learn/[cid]", params: { cid: course.id } })
+            : buyOff ? Linking.openURL(`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(`Namaste, mujhe "${course.title}" course lena hai. Mera mobile: ${student?.phone ?? ""}`)}`)
+            : buy())}
           style={[s.buy, busy && { opacity: 0.6 }, canOpen && { backgroundColor: C.green }]}
         >
-          <Text style={s.buyT}>{busy ? "Ruko…" : canOpen ? "Course Kholein" : "Buy Now"}</Text>
+          <Text style={s.buyT}>{busy ? "Ruko…" : canOpen ? "Course Kholein" : buyOff ? "📞 Sampark Karein" : "Buy Now"}</Text>
         </Pressable>
       </View>
     </View>
