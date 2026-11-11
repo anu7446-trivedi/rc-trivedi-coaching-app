@@ -36,24 +36,44 @@ export default function CourseDetail() {
   const owned = isActive(enr);
   const canOpen = owned || isFree(course);
 
+  // Payment ke baad course khula ya nahi — server (webhook) se pakki jaankari, kuch second tak dekhte hain.
+  const waitForAccess = async (tries = 8) => {
+    for (let i = 0; i < tries; i++) {
+      if (isActive(await getEnrollment(student!.id, course.id))) return true;
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+    return false;
+  };
+
   const buy = async () => {
     if (!user || !student) { router.push("/login"); return; }
     setBusy(true);
+    let res: any = null, err: any = null;
     try {
       const o = await createOrder(course.id);
-      const res: any = await RazorpayCheckout.open({
-        key: o.keyId, order_id: o.orderId, amount: o.amount, currency: "INR",
-        name: settings.name, description: course.title,
-        prefill: { name: student.name, contact: student.phone, email: "" },
-        theme: { color: C.blue },
-      });
-      await verifyPayment({ orderId: res.razorpay_order_id ?? o.orderId, paymentId: res.razorpay_payment_id, signature: res.razorpay_signature });
-      notify("Payment safal ✓", "Course aapke liye khul gaya hai. Padhai shuru karein!");
-      reload();
+      try {
+        res = await RazorpayCheckout.open({
+          key: o.keyId, order_id: o.orderId, amount: o.amount, currency: "INR",
+          name: settings.name, description: course.title,
+          prefill: { name: student.name, contact: student.phone },
+          theme: { color: C.blue },
+        });
+      } catch (e) { err = e; }
+      if (res?.razorpay_payment_id && res?.razorpay_signature) {
+        await verifyPayment({ orderId: res.razorpay_order_id ?? o.orderId, paymentId: res.razorpay_payment_id, signature: res.razorpay_signature }).catch(() => {});
+      }
+      // Razorpay kabhi payment ke baad bhi error dikha deta hai — isliye server se confirm karo
+      const ok = await waitForAccess(res ? 8 : 4);
+      if (ok) {
+        notify("Payment safal ✓", "Course aapke liye khul gaya hai. Padhai shuru karein!");
+        reload();
+        return;
+      }
+      const msg = err?.description || err?.error?.description || err?.message || "";
+      if (err && (err?.code === 0 || /cancel/i.test(msg))) notify("Payment cancel hua", "Koi paisa nahi kata. Dobara try kar sakte hain.");
+      else notify("Payment ki pushti nahi hui", "Agar paisa kat gaya ho to 5–10 minute me course apne aap khul jayega (app dobara kholein). Warna coaching se sampark karein.");
     } catch (e: any) {
-      const msg = e?.description || e?.error?.description || e?.message || "";
-      if (e?.code === 0 || /cancel/i.test(msg)) notify("Payment cancel hua", "Koi paisa nahi kata. Dobara try kar sakte hain.");
-      else notify("Payment nahi hua", msg + "\n\nAgar paisa kat gaya ho to 5–10 minute me course apne aap khul jayega, warna coaching se sampark karein.");
+      notify("Payment shuru nahi hua", e?.message ?? "Internet check karke dobara try karein.");
     } finally { setBusy(false); }
   };
 
