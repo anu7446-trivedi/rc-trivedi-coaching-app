@@ -1,0 +1,53 @@
+========== PLAY STORE LISTING — RC Trivedi Coaching ==========
+
+App name (30 akshar tak):
+RC Trivedi Coaching - Navodaya
+
+Short description (80 akshar tak):
+नवोदय, सैनिक स्कूल कक्षा 6 प्रवेश परीक्षा: वीडियो, नोट्स, टेस्ट, मॉडल पेपर
+
+Full description:
+RC Trivedi Coaching Center (राघवपुर, बाराबंकी) का आधिकारिक ऐप — जवाहर नवोदय विद्यालय (JNVST) कक्षा 6 प्रवेश परीक्षा की पूरी तैयारी अब आपके मोबाइल पर।
+
+📚 क्या मिलेगा:
+✔ मानसिक योग्यता (Reasoning), अंकगणित (Maths), हिंदी भाषा और EVS के पूरे कोर्स
+✔ अध्यायवार PDF नोट्स — ऐप के अंदर ही पढ़ें
+✔ वीडियो क्लास और लाइव क्लास
+✔ टॉपिक-वाइज़ ऑनलाइन टेस्ट — तुरंत रिज़ल्ट और सही उत्तर
+✔ 50 मॉडल टेस्ट पेपर — असली परीक्षा जैसा अभ्यास
+✔ सम्पूर्ण कोर्स — सभी विषय एक साथ, सबसे कम कीमत में
+✔ मुफ़्त मॉक टेस्ट और नोट्स
+
+🎯 किन परीक्षाओं के लिए:
+• जवाहर नवोदय विद्यालय (JNV) — कक्षा 6
+• सैनिक स्कूल — कक्षा 6
+• विद्याज्ञान स्कूल — कक्षा 6
+• सर्वोदय विद्यालय
+
+🔐 आसान और सुरक्षित:
+• मोबाइल नंबर + OTP से लॉगिन
+• UPI / कार्ड / नेट बैंकिंग से सुरक्षित भुगतान (Razorpay)
+• भुगतान होते ही कोर्स तुरंत खुल जाता है
+
+📞 संपर्क: अनुराग त्रिवेदी — 9005167446
+📍 राघवपुर, बाराबंकी, उत्तर प्रदेश
+🌐 https://rc-trivedi-coaching.web.app
+
+Navodaya coaching, JNVST class 6, Navodaya entrance exam preparation, Sainik School class 6, Vidyagyan, Barabanki.
+
+---------------------------------------------------------------
+App category: Education
+Contact email: rct.anurag.2015@gmail.com
+Contact phone: +91 9005167446
+Website: https://rc-trivedi-coaching.web.app
+Privacy policy URL: https://rc-trivedi-coaching.web.app/privacy.html
+Account deletion URL: https://rc-trivedi-coaching.web.app/delete-account.html
+
+App access (Play review ke liye login):
+  "All or some functionality is restricted" chunein → Add instructions:
+  Name: Student test login
+  Username/phone: 9999999999
+  Password/OTP: 123456
+  Note: Login screen par "Student" chunein, mobile 9999999999 daalein, "OTP Bhejein" dabayein, OTP 123456 daalein.
+
+Ads: No, app me ads nahi hain.
