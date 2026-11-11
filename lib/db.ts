@@ -18,7 +18,7 @@ export type Settings = {
   buyEnabled?: boolean;
 };
 export type Student = {
-  id: string; name: string; phone: string; fatherName?: string; className?: string;
+  id: string; name: string; phone: string; fatherName?: string; className?: string; photoUrl?: string;
   address?: string; batchId?: string; monthlyFee?: number; active: boolean; createdAt?: TS;
 };
 export type Category = "maths" | "reasoning" | "hindi" | "evs" | "full" | "tests" | "free" | "other";
@@ -142,6 +142,14 @@ export const getStudent = async (id: string) => { const s = await one<any>("stud
 export const createMyProfile = (uid: string, p: Omit<Student, "id" | "active" | "createdAt">) =>
   setDoc(doc(db, "students", uid), { ...p, active: true, createdAt: serverTimestamp() });
 export const updateStudent = (id: string, data: Partial<Student>) => updateDoc(doc(db, "students", id), data as any);
+/** Student ki profile photo upload (profiles/{uid}.jpg) */
+export async function uploadMyPhoto(uid: string, localUri: string) {
+  const r = ref(storage, `profiles/${uid}.jpg`);
+  await putFile(r, localUri, { contentType: "image/jpeg" });
+  const url = await getDownloadURL(r);
+  await updateDoc(doc(db, "students", uid), { photoUrl: url });
+  return url;
+}
 export const updateMyProfile = (id: string, data: Pick<Student, "name" | "fatherName" | "className" | "address">) =>
   updateDoc(doc(db, "students", id), data as any);
 

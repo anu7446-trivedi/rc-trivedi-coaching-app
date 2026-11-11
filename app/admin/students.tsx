@@ -16,7 +16,7 @@ export default function Students() {
       <Input placeholder="🔍 Naam ya mobile se khojein" value={q} onChangeText={setQ} />
       {items.length === 0 ? <Empty text="Koi student nahi mila." /> : null}
       {items.map((s) => (
-        <Row key={s.id} icon="person-circle-outline" title={s.name}
+        <Row key={s.id} icon="person-circle-outline" photo={s.photoUrl} title={s.name}
           subtitle={`${s.phone.replace("+91", "")} • ${s.className || "—"} • ${fmtDate(s.createdAt)}`}
           right={s.active ? undefined : <Badge label="Band" color={C.red} />}
           onPress={() => router.push({ pathname: "/admin/student-edit", params: { id: s.id } })} />

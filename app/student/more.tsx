@@ -1,9 +1,10 @@
-import React from "react";
-import { Linking, Share, StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import { ActivityIndicator, Image, Linking, Pressable, Share, StyleSheet, Text, View } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { authErrorHi, useAuth } from "../../lib/auth";
-import { deleteMyAccount } from "../../lib/db";
+import { deleteMyAccount, uploadMyPhoto } from "../../lib/db";
 import { getSettings } from "../../lib/db";
 import { useLoad } from "../../lib/useLoad";
 import { Btn, Row, Screen, confirm, notify } from "../../components/ui";
@@ -12,12 +13,26 @@ import { C } from "../../lib/theme";
 const PRIVACY = "https://rc-trivedi-coaching.web.app/privacy.html";
 
 export default function More() {
-  const { student, logout } = useAuth();
+  const { student, logout, refreshStudent } = useAuth();
+  const [up, setUp] = useState(false);
+  const pickPhoto = async () => {
+    const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.6 });
+    if (r.canceled) return;
+    setUp(true);
+    try { await uploadMyPhoto(student!.id, r.assets[0].uri); await refreshStudent(); }
+    catch (e: any) { notify("Photo nahi lagi", e?.message); }
+    finally { setUp(false); }
+  };
   const { data: st } = useLoad(getSettings);
   return (
     <Screen>
       <View style={s.head}>
-        <View style={s.av}><Text style={s.avT}>{student!.name.charAt(0).toUpperCase()}</Text></View>
+        <Pressable onPress={pickPhoto} style={s.av}>
+          {up ? <ActivityIndicator color={C.navy} /> : student!.photoUrl
+            ? <Image source={{ uri: student!.photoUrl }} style={{ width: 64, height: 64, borderRadius: 32 }} />
+            : <Text style={s.avT}>{student!.name.charAt(0).toUpperCase()}</Text>}
+          <View style={s.cam}><Text style={{ fontSize: 12 }}>📷</Text></View>
+        </Pressable>
         <View style={{ flex: 1 }}>
           <Text style={s.name}>{student!.name}</Text>
           <Text style={s.ph}>{student!.phone}</Text>
@@ -48,7 +63,8 @@ export default function More() {
 
 const s = StyleSheet.create({
   head: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: C.navy, borderRadius: 16, padding: 16, marginBottom: 14 },
-  av: { width: 52, height: 52, borderRadius: 26, backgroundColor: C.gold, alignItems: "center", justifyContent: "center" },
+  av: { width: 64, height: 64, borderRadius: 32, backgroundColor: C.gold, alignItems: "center", justifyContent: "center" },
+  cam: { position: "absolute", right: -2, bottom: -2, backgroundColor: "#fff", borderRadius: 11, width: 22, height: 22, alignItems: "center", justifyContent: "center" },
   avT: { fontSize: 22, fontWeight: "900", color: C.navy },
   name: { color: "#fff", fontWeight: "900", fontSize: 17 },
   ph: { color: "#c8d4e6", marginTop: 2 },

@@ -40,7 +40,7 @@ service cloud.firestore {
       );
       allow update: if isAdmin() || (
         signedIn() && request.auth.uid == uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'fatherName', 'className', 'address'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'fatherName', 'className', 'address', 'photoUrl'])
       );
       // Student apna account khud delete kar sakta hai (Play Store niyam)
       allow delete: if isAdmin() || (signedIn() && request.auth.uid == uid);

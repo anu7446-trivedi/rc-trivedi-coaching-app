@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, Text,
+  ActivityIndicator, Alert, Image, Platform, Pressable, ScrollView, StyleSheet, Text,
   TextInput, TextInputProps, View, ViewStyle, RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -69,13 +69,13 @@ export function Btn({ title, onPress, color = C.blue, outline, small, icon, disa
   );
 }
 
-export function Row({ icon, title, subtitle, onPress, right, color = C.blue }: {
+export function Row({ icon, title, subtitle, onPress, right, color = C.blue, photo }: {
   icon?: keyof typeof Ionicons.glyphMap; title: string; subtitle?: string; onPress?: () => void;
-  right?: React.ReactNode; color?: string;
+  right?: React.ReactNode; color?: string; photo?: string;
 }) {
   return (
     <Pressable onPress={onPress} disabled={!onPress} style={({ pressed }) => [s.row, pressed && { opacity: 0.7 }]}>
-      {icon ? (
+      {photo ? <Image source={{ uri: photo }} style={[s.rowIcon, { borderRadius: 21 }]} /> : icon ? (
         <View style={[s.rowIcon, { backgroundColor: color + "18" }]}>
           <Ionicons name={icon} size={22} color={color} />
         </View>
