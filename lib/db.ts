@@ -14,6 +14,8 @@ export type Settings = {
   name: string; tagline: string; address: string; phone: string; whatsapp: string;
   upiId: string; upiName: string; about: string; courses: string[]; banners: Banner[];
   privacyUrl?: string;
+  /** Home page par "Owner" card */
+  ownerName?: string; ownerTitle?: string; ownerPhoto?: string; ownerMessage?: string;
   /** false = app me "Buy Now" ki jagah "Sampark karein" (Play Store suraksha switch) */
   buyEnabled?: boolean;
 };
@@ -77,6 +79,10 @@ export const DEFAULT_SETTINGS: Settings = {
   about: "Class 6 entrance exams ki behtareen taiyari — JNV, Vidyagyan, Sainik School, Sarvodaya Vidyalaya.",
   courses: [],
   banners: [],
+  ownerName: "Anurag Trivedi",
+  ownerTitle: "Owner — RC Trivedi Coaching Center",
+  ownerPhoto: "",
+  ownerMessage: "Har bacche ka sapna, hamara lakshya. Navodaya ki pakki taiyari ke liye hum aapke saath hain.",
 };
 
 // ---------- Helpers ----------

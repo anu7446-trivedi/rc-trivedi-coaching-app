@@ -44,6 +44,22 @@ export default function AppSettings() {
         <Sub>Badlav ke baad neeche "Save Karein" dabayein.</Sub>
       </Card>
       <Card>
+        <Label>👤 Owner (home page par sabko dikhega)</Label>
+        {s.ownerPhoto ? <Image source={{ uri: s.ownerPhoto }} style={{ width: 110, height: 110, borderRadius: 55, alignSelf: "center", marginBottom: 8 }} /> : null}
+        <Btn title={s.ownerPhoto ? "Photo badlein" : "Apni photo lagayein"} icon="person-circle-outline" outline loading={uploading} onPress={async () => {
+          const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.8, allowsEditing: true, aspect: [1, 1] });
+          if (r.canceled) return;
+          setUploading(true);
+          try { setS({ ...s, ownerPhoto: await uploadImage(r.assets[0].uri, "owner") }); notify("Photo lag gayi", "Neeche 'Save Karein' zaroor dabayein."); }
+          catch (e: any) { notify("Upload nahi hua", e?.message); }
+          finally { setUploading(false); }
+        }} />
+        <Input label="Naam" value={s.ownerName ?? ""} onChangeText={set("ownerName")} />
+        <Input label="Pad / Title" value={s.ownerTitle ?? ""} onChangeText={set("ownerTitle")} placeholder="Owner — RC Trivedi Coaching Center" />
+        <Input label="Sandesh (chhota)" value={s.ownerMessage ?? ""} onChangeText={set("ownerMessage")} multiline />
+        <Sub>Naam khaali karne par ye dabba home page se hat jayega.</Sub>
+      </Card>
+      <Card>
         <Label>🖼️ Home Page Banners</Label>
         <Sub>Banner photo chaudi (2:1, jaise 1200×600) rakhein. Har banner kisi course se jod sakte hain.</Sub>
         {s.banners.map((b, i) => (

@@ -1,5 +1,5 @@
 import React from "react";
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { getCourses, getMyEnrollments, getNotices, getSettings, isActive } from "../lib/db";
@@ -49,6 +49,24 @@ export default function StoreHome() {
       <Text style={s.h}>Kya padhna hai?</Text>
       <CategoryGrid />
 
+      {st?.ownerName ? (
+        <View style={s.owner}>
+          {st.ownerPhoto ? (
+            <Image source={{ uri: st.ownerPhoto }} style={s.ownerImg} />
+          ) : (
+            <View style={[s.ownerImg, { backgroundColor: C.gold, alignItems: "center", justifyContent: "center" }]}>
+              <Text style={{ fontSize: 34, fontWeight: "900", color: C.navy }}>{st.ownerName.charAt(0)}</Text>
+            </View>
+          )}
+          <View style={{ flex: 1 }}>
+            <Text style={s.ownerTag}>OWNER</Text>
+            <Text style={s.ownerName}>{st.ownerName}</Text>
+            {st.ownerTitle ? <Text style={s.ownerTitle}>{st.ownerTitle}</Text> : null}
+            {st.ownerMessage ? <Text style={s.ownerMsg}>“{st.ownerMessage}”</Text> : null}
+          </View>
+        </View>
+      ) : null}
+
       {featured.length ? (
         <>
           <Text style={s.h}>⭐ Featured Courses</Text>
@@ -84,6 +102,12 @@ const s = StyleSheet.create({
   notice: { backgroundColor: "#fff7dc", borderRadius: 12, padding: 12, marginBottom: 12 },
   noticeT: { color: "#7a5600", fontWeight: "800" },
   h: { fontSize: 19, fontWeight: "900", color: C.navy, marginTop: 8, marginBottom: 10 },
+  owner: { flexDirection: "row", gap: 14, alignItems: "center", backgroundColor: C.navy, borderRadius: 18, padding: 14, marginTop: 4, marginBottom: 10 },
+  ownerImg: { width: 92, height: 92, borderRadius: 46, borderWidth: 3, borderColor: C.gold },
+  ownerTag: { color: C.navy, backgroundColor: C.gold, alignSelf: "flex-start", fontWeight: "900", fontSize: 10, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, overflow: "hidden" },
+  ownerName: { color: "#fff", fontWeight: "900", fontSize: 19, marginTop: 4 },
+  ownerTitle: { color: "#c8d4e6", fontSize: 12 },
+  ownerMsg: { color: "#f7df9a", fontSize: 13, marginTop: 6, fontStyle: "italic", lineHeight: 19 },
   contact: { backgroundColor: C.navy, borderRadius: 16, padding: 16, marginTop: 10 },
   cn: { color: C.gold, fontWeight: "900", fontSize: 17 },
   ca: { color: "#c8d4e6", fontSize: 12, marginTop: 2 },
