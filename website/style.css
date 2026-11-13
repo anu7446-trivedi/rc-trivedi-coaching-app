@@ -15,3 +15,4 @@ footer{background:var(--navy);color:#c8d4e6;text-align:center;padding:16px;font-
 .price s{color:#94a3b8;font-weight:600;font-size:.75em;margin-right:6px}
 .tbl{width:100%;border-collapse:collapse}.tbl td,.tbl th{border:1px solid #e2e8f0;padding:6px;text-align:left}
 nav{display:flex;flex-wrap:wrap;gap:4px}
+.wa-float{position:fixed;right:16px;bottom:16px;background:#25D366;color:#fff;font-weight:800;padding:12px 18px;border-radius:30px;text-decoration:none;box-shadow:0 4px 14px #0004;z-index:9}
