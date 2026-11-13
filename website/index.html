@@ -6,7 +6,7 @@
 <meta property="og:title" content="Navodaya Coaching Barabanki | JNV, Sainik School Class 6 Entrance — RC Trivedi Coaching Center"><meta property="og:description" content="Navodaya Vidyalaya (JNVST) Class 6 pravesh pariksha ki taiyari — Raghavpur, Barabanki (UP). Sainik School, Vidyagyan, Sarvodaya. Online video classes, notes, test series aur 50 model paper. नवोदय कोचिंग बाराबंकी।">
 <meta property="og:image" content="https://rc-trivedi-coaching.web.app/logo.png"><meta property="og:url" content="https://rc-trivedi-coaching.web.app/"><meta property="og:type" content="website">
 <!-- GOOGLE_VERIFY -->
-<link rel="icon" href="logo.png"><link rel="stylesheet" href="style.css?v=3"><script type="application/ld+json">{"@context":"https://schema.org","@type":["EducationalOrganization","LocalBusiness"],
+<link rel="icon" href="logo.png"><link rel="stylesheet" href="style.css?v=4"><script type="application/ld+json">{"@context":"https://schema.org","@type":["EducationalOrganization","LocalBusiness"],
 "name":"RC Trivedi Coaching Center","alternateName":["RC Trivedi Coaching","आरसी त्रिवेदी कोचिंग सेंटर"],
 "description":"Navodaya Vidyalaya (JNVST), Sainik School, Vidyagyan aur Sarvodaya Vidyalaya Class 6 pravesh pariksha ki coaching — Raghavpur, Barabanki.",
 "url":"https://rc-trivedi-coaching.web.app/","logo":"https://rc-trivedi-coaching.web.app/logo.png","image":"https://rc-trivedi-coaching.web.app/logo.png","telephone":"+91-9005167446","email":"rct.anurag.2015@gmail.com",
@@ -22,6 +22,21 @@
 <div class="card"><h2 style="margin-top:0">नवोदय कोचिंग बाराबंकी — RC Trivedi Coaching Center</h2>
 <p>जवाहर नवोदय विद्यालय (JNVST) कक्षा 6 प्रवेश परीक्षा, सैनिक स्कूल, विद्याज्ञान और सर्वोदय विद्यालय की तैयारी — राघवपुर, बाराबंकी (उत्तर प्रदेश)। ऑफ़लाइन क्लास के साथ मोबाइल ऐप पर वीडियो क्लास, नोट्स, टॉपिक-वाइज़ टेस्ट और 50 मॉडल टेस्ट पेपर।</p>
 <p><a href="navodaya-pravesh-pariksha.html">→ Navodaya pravesh pariksha ka pattern aur syllabus dekhein</a></p></div>
+<div class="owner" id="owner">
+<img id="ownerPhoto" src="https://firebasestorage.googleapis.com/v0/b/rc-trivedi-coaching.firebasestorage.app/o/images%2Fowner%2F1794459475019.jpg?alt=media&token=0f97a1e0-454c-4487-aa63-0114fdd2d88a" alt="Anurag Trivedi — Owner, RC Trivedi Coaching Center">
+<div><span class="otag">OWNER</span>
+<h3 id="ownerName">Anurag Trivedi</h3>
+<p class="otitle" id="ownerTitle">Owner — RC Trivedi Coaching Center</p>
+<p class="omsg" id="ownerMsg">“Har bacche ka sapna, hamara lakshya. Navodaya ki pakki taiyari ke liye hum aapke saath hain.”</p></div></div>
+<script>
+// App ke Admin → App Settings me badli gayi photo/naam yahan bhi apne aap dikhe
+fetch("https://firestore.googleapis.com/v1/projects/rc-trivedi-coaching/databases/(default)/documents/settings/app?key=AIzaSyDzwO0iRAMK9BDeCVVgTHfVzouX0kuyznQ")
+.then(r=>r.json()).then(d=>{const f=d.fields||{};const v=k=>f[k]&&f[k].stringValue;
+if(v("ownerPhoto"))document.getElementById("ownerPhoto").src=v("ownerPhoto");
+if(v("ownerName"))document.getElementById("ownerName").textContent=v("ownerName");
+if(v("ownerTitle"))document.getElementById("ownerTitle").textContent=v("ownerTitle");
+if(v("ownerMessage"))document.getElementById("ownerMsg").textContent="“"+v("ownerMessage")+"”";}).catch(()=>{});
+</script>
 <h2 id="courses">Courses &amp; Fees</h2>
 <p class="muted">Online courses hamare Android app "RC Trivedi Coaching" me milte hain. Payment Razorpay dwara surakshit tarike se hota hai (UPI, Card, Net Banking). Fees me sabhi taxes shamil hain.</p>
 <div class="grid">
